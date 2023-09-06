@@ -1,4 +1,4 @@
-package repositories
+package storage
 
 import (
 	"fmt"
@@ -7,25 +7,26 @@ import (
 	"github.com/google/uuid"
 )
 
-type BaseRepository[T any] interface {
+// GenericRepository is a in memory repository using generics
+type GenericRepository[T any] interface {
 	Get() ([]T, error)
 	GetByID(uuid.UUID) (T, error)
 	Add(T) error
 	Update(uuid.UUID, T) error
 }
 
-type baseRepository[T any] struct {
+type genericRepository[T any] struct {
 	Items map[uuid.UUID]T
 	m     sync.RWMutex
 }
 
-func NewBaseRepository[T any]() BaseRepository[T] {
-	return &baseRepository[T]{
+func NewGenericRepository[T any]() GenericRepository[T] {
+	return &genericRepository[T]{
 		Items: make(map[uuid.UUID]T),
 	}
 }
 
-func (r *baseRepository[T]) Get() ([]T, error) {
+func (r *genericRepository[T]) Get() ([]T, error) {
 	r.m.RLock()
 	defer r.m.RUnlock()
 
@@ -37,20 +38,20 @@ func (r *baseRepository[T]) Get() ([]T, error) {
 	return items, nil
 }
 
-func (r *baseRepository[T]) GetByID(id uuid.UUID) (T, error) {
+func (r *genericRepository[T]) GetByID(id uuid.UUID) (T, error) {
 	r.m.RLock()
 	defer r.m.RUnlock()
 
 	_, found := r.Items[id]
 
 	if !found {
-		return *new(T), fmt.Errorf("Item with ID %s not found", id)
+		return *new(T), fmt.Errorf("item with ID %s not found", id)
 	}
 
 	return r.Items[id], nil
 }
 
-func (r *baseRepository[T]) Add(item T) error {
+func (r *genericRepository[T]) Add(item T) error {
 	r.m.Lock()
 	defer r.m.Unlock()
 
@@ -59,14 +60,14 @@ func (r *baseRepository[T]) Add(item T) error {
 	return nil
 }
 
-func (r *baseRepository[T]) Update(id uuid.UUID, item T) error {
+func (r *genericRepository[T]) Update(id uuid.UUID, item T) error {
 	r.m.Lock()
 	defer r.m.Unlock()
 
 	_, found := r.Items[id]
 
 	if !found {
-		return fmt.Errorf("Item with ID %s not found", id)
+		return fmt.Errorf("item with ID %s not found", id)
 	}
 
 	r.Items[id] = item
