@@ -1,0 +1,43 @@
+type User {
+    id: ID!
+    name: String!
+}
+
+type Todo {
+    id: ID!
+    text: String!
+    done: Boolean!
+    createdAt: String!
+    completedAt: String
+    userID: ID!
+}
+
+type Query {
+    todos: [Todo!]!
+    todosByUserID(userID: ID!): [Todo!]!
+    todoByID(id: ID!): Todo
+    users: [User!]!
+    usersByID(id: ID!): User
+}
+
+type Mutation {
+    createTodo(cmd: CreateTodo!): CmdResponse!
+    updateTodo(id: ID!, cmd: UpdateTodo!): CmdResponse!
+    completeTodo(id: ID!): CmdResponse!
+}
+
+input CreateTodo {
+    text: String!
+    userID: ID!
+}
+
+input UpdateTodo {
+    id: ID!
+    text: String!
+    userID: ID!
+}
+
+type CmdResponse {
+    isSucessfull: Boolean!
+    error: String
+}
