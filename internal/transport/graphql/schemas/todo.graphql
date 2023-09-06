@@ -4,6 +4,7 @@ type Todo {
     done: Boolean!
     createdAt: String!
     completedAt: String
+    dueAt: String!
     userID: ID!
 }
 
@@ -14,23 +15,28 @@ type Query {
 }
 
 type Mutation {
-    createTodo(cmd: CreateTodo!): CmdResponse!
-    updateTodo(id: ID!, cmd: UpdateTodo!): CmdResponse!
-    completeTodo(id: ID!): CmdResponse!
+    createTodo(cmd: CreateTodo!): TodoMutationResponse!
+    updateTodo(id: ID!, cmd: UpdateTodo!): TodoMutationResponse!
+    completeTodo(id: ID!): TodoMutationResponse!
 }
 
 input CreateTodo {
     text: String!
+    dueAt: String!
     userID: ID!
 }
 
 input UpdateTodo {
     id: ID!
     text: String!
+    done: Boolean!
+    dueAt: String!
     userID: ID!
 }
 
-type CmdResponse {
-    isSucessfull: Boolean!
+type TodoMutationResponse {
+    sucess: Boolean!
     error: String
+    message: String
+    todo: Todo
 }

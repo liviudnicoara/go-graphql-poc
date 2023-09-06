@@ -6,42 +6,117 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/liviudnicoara/go-graphql-poc/shared"
 )
 
 // CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, cmd shared.CreateTodo) (*shared.CmdResponse, error) {
-	err := r.Todos.Add(shared.Todo{
+func (r *mutationResolver) CreateTodo(ctx context.Context, cmd shared.CreateTodo) (*shared.TodoMutationResponse, error) {
+	todo := shared.Todo{
 		Text:   cmd.Text,
+		DueAt:  cmd.DueAt,
 		UserID: cmd.UserID,
-	})
+	}
+
+	err := r.TodoRepo.Add(todo)
 
 	if err != nil {
-		return &shared.CmdResponse{
-			IsSucessfull: false,
+		errMsg := err.Error()
+		return &shared.TodoMutationResponse{
+			Sucess: false,
+			Error:  &errMsg,
 		}, nil
 	}
 
-	return &shared.CmdResponse{
-		IsSucessfull: true,
+	return &shared.TodoMutationResponse{
+		Sucess:  true,
+		Message: &shared.TodoCreatedMsg,
+		Todo:    &todo,
 	}, nil
 }
 
 // UpdateTodo is the resolver for the updateTodo field.
-func (r *mutationResolver) UpdateTodo(ctx context.Context, id string, cmd shared.UpdateTodo) (*shared.CmdResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateTodo - updateTodo"))
+func (r *mutationResolver) UpdateTodo(ctx context.Context, id string, cmd shared.UpdateTodo) (*shared.TodoMutationResponse, error) {
+	validID, err := uuid.Parse(id)
+
+	if err != nil {
+		errMsg := err.Error()
+		return &shared.TodoMutationResponse{
+			Sucess: false,
+			Error:  &errMsg,
+		}, nil
+	}
+
+	todo := shared.Todo{
+		ID:     validID.String(),
+		Text:   cmd.Text,
+		DueAt:  cmd.DueAt,
+		Done:   cmd.Done,
+		UserID: cmd.UserID,
+	}
+
+	err = r.TodoRepo.Update(validID, todo)
+
+	if err != nil {
+		errMsg := err.Error()
+		return &shared.TodoMutationResponse{
+			Sucess: false,
+			Error:  &errMsg,
+		}, nil
+	}
+
+	return &shared.TodoMutationResponse{
+		Sucess:  true,
+		Message: &shared.TodoCreatedMsg,
+		Todo:    &todo,
+	}, nil
 }
 
 // CompleteTodo is the resolver for the completeTodo field.
-func (r *mutationResolver) CompleteTodo(ctx context.Context, id string) (*shared.CmdResponse, error) {
-	panic(fmt.Errorf("not implemented: CompleteTodo - completeTodo"))
+func (r *mutationResolver) CompleteTodo(ctx context.Context, id string) (*shared.TodoMutationResponse, error) {
+	validID, err := uuid.Parse(id)
+
+	if err != nil {
+		errMsg := err.Error()
+		return &shared.TodoMutationResponse{
+			Sucess: false,
+			Error:  &errMsg,
+		}, nil
+	}
+
+	todo, err := r.TodoRepo.GetByID(validID)
+
+	if err != nil {
+		errMsg := err.Error()
+		return &shared.TodoMutationResponse{
+			Sucess: false,
+			Error:  &errMsg,
+		}, nil
+	}
+
+	todo.Done = true
+
+	err = r.TodoRepo.Update(validID, todo)
+
+	if err != nil {
+		errMsg := err.Error()
+		return &shared.TodoMutationResponse{
+			Sucess: false,
+			Error:  &errMsg,
+		}, nil
+	}
+
+	return &shared.TodoMutationResponse{
+		Sucess:  true,
+		Message: &shared.TodoCreatedMsg,
+		Todo:    &todo,
+	}, nil
 }
 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*shared.Todo, error) {
-	todos, err := r.Resolver.Todos.Get()
+	todos, err := r.Resolver.TodoRepo.Get()
 
 	if err != nil {
 		return nil, err
@@ -57,12 +132,38 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*shared.Todo, error) {
 
 // TodosByUserID is the resolver for the todosByUserID field.
 func (r *queryResolver) TodosByUserID(ctx context.Context, userID string) ([]*shared.Todo, error) {
-	panic(fmt.Errorf("not implemented: TodosByUserID - todosByUserID"))
+	todos, err := r.TodoRepo.Get()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var userTodos []*shared.Todo
+
+	for _, t := range todos {
+		if t.UserID == userID {
+			userTodos = append(userTodos, &t)
+		}
+	}
+
+	return userTodos, nil
 }
 
 // TodoByID is the resolver for the todoByID field.
 func (r *queryResolver) TodoByID(ctx context.Context, id string) (*shared.Todo, error) {
-	panic(fmt.Errorf("not implemented: TodoByID - todoByID"))
+	validID, err := uuid.Parse(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	todo, err := r.TodoRepo.GetByID(validID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &todo, nil
 }
 
 // Mutation returns MutationResolver implementation.

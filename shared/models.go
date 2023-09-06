@@ -2,13 +2,9 @@
 
 package shared
 
-type CmdResponse struct {
-	IsSucessfull bool    `json:"isSucessfull"`
-	Error        *string `json:"error,omitempty"`
-}
-
 type CreateTodo struct {
 	Text   string `json:"text"`
+	DueAt  string `json:"dueAt"`
 	UserID string `json:"userID"`
 }
 
@@ -18,12 +14,22 @@ type Todo struct {
 	Done        bool    `json:"done"`
 	CreatedAt   string  `json:"createdAt"`
 	CompletedAt *string `json:"completedAt,omitempty"`
+	DueAt       string  `json:"dueAt"`
 	UserID      string  `json:"userID"`
+}
+
+type TodoMutationResponse struct {
+	Sucess  bool    `json:"sucess"`
+	Error   *string `json:"error,omitempty"`
+	Message *string `json:"message,omitempty"`
+	Todo    *Todo   `json:"todo,omitempty"`
 }
 
 type UpdateTodo struct {
 	ID     string `json:"id"`
 	Text   string `json:"text"`
+	Done   bool   `json:"done"`
+	DueAt  string `json:"dueAt"`
 	UserID string `json:"userID"`
 }
 

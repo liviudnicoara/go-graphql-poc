@@ -10,6 +10,6 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Users user.UserRepository
-	Todos todo.TodoRepository
+	UserRepo user.UserRepository
+	TodoRepo todo.TodoRepository
 }

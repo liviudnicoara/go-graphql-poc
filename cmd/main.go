@@ -21,8 +21,8 @@ func main() {
 	}
 
 	resolver := graphql.Resolver{
-		Users: user.NewUserRepository(),
-		Todos: todo.NewToDoRepository(),
+		UserRepo: user.NewUserRepository(),
+		TodoRepo: todo.NewToDoRepository(),
 	}
 
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &resolver}))

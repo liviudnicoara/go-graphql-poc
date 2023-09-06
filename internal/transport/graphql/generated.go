@@ -45,11 +45,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	CmdResponse struct {
-		Error        func(childComplexity int) int
-		IsSucessfull func(childComplexity int) int
-	}
-
 	Mutation struct {
 		CompleteTodo func(childComplexity int, id string) int
 		CreateTodo   func(childComplexity int, cmd shared.CreateTodo) int
@@ -68,9 +63,17 @@ type ComplexityRoot struct {
 		CompletedAt func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
 		Done        func(childComplexity int) int
+		DueAt       func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Text        func(childComplexity int) int
 		UserID      func(childComplexity int) int
+	}
+
+	TodoMutationResponse struct {
+		Error   func(childComplexity int) int
+		Message func(childComplexity int) int
+		Sucess  func(childComplexity int) int
+		Todo    func(childComplexity int) int
 	}
 
 	User struct {
@@ -80,9 +83,9 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateTodo(ctx context.Context, cmd shared.CreateTodo) (*shared.CmdResponse, error)
-	UpdateTodo(ctx context.Context, id string, cmd shared.UpdateTodo) (*shared.CmdResponse, error)
-	CompleteTodo(ctx context.Context, id string) (*shared.CmdResponse, error)
+	CreateTodo(ctx context.Context, cmd shared.CreateTodo) (*shared.TodoMutationResponse, error)
+	UpdateTodo(ctx context.Context, id string, cmd shared.UpdateTodo) (*shared.TodoMutationResponse, error)
+	CompleteTodo(ctx context.Context, id string) (*shared.TodoMutationResponse, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*shared.Todo, error)
@@ -106,20 +109,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "CmdResponse.error":
-		if e.complexity.CmdResponse.Error == nil {
-			break
-		}
-
-		return e.complexity.CmdResponse.Error(childComplexity), true
-
-	case "CmdResponse.isSucessfull":
-		if e.complexity.CmdResponse.IsSucessfull == nil {
-			break
-		}
-
-		return e.complexity.CmdResponse.IsSucessfull(childComplexity), true
 
 	case "Mutation.completeTodo":
 		if e.complexity.Mutation.CompleteTodo == nil {
@@ -228,6 +217,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.Done(childComplexity), true
 
+	case "Todo.dueAt":
+		if e.complexity.Todo.DueAt == nil {
+			break
+		}
+
+		return e.complexity.Todo.DueAt(childComplexity), true
+
 	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
 			break
@@ -248,6 +244,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.UserID(childComplexity), true
+
+	case "TodoMutationResponse.error":
+		if e.complexity.TodoMutationResponse.Error == nil {
+			break
+		}
+
+		return e.complexity.TodoMutationResponse.Error(childComplexity), true
+
+	case "TodoMutationResponse.message":
+		if e.complexity.TodoMutationResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.TodoMutationResponse.Message(childComplexity), true
+
+	case "TodoMutationResponse.sucess":
+		if e.complexity.TodoMutationResponse.Sucess == nil {
+			break
+		}
+
+		return e.complexity.TodoMutationResponse.Sucess(childComplexity), true
+
+	case "TodoMutationResponse.todo":
+		if e.complexity.TodoMutationResponse.Todo == nil {
+			break
+		}
+
+		return e.complexity.TodoMutationResponse.Todo(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -542,91 +566,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _CmdResponse_isSucessfull(ctx context.Context, field graphql.CollectedField, obj *shared.CmdResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CmdResponse_isSucessfull(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.IsSucessfull, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_CmdResponse_isSucessfull(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "CmdResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _CmdResponse_error(ctx context.Context, field graphql.CollectedField, obj *shared.CmdResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CmdResponse_error(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Error, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_CmdResponse_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "CmdResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createTodo(ctx, field)
 	if err != nil {
@@ -653,9 +592,9 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*shared.CmdResponse)
+	res := resTmp.(*shared.TodoMutationResponse)
 	fc.Result = res
-	return ec.marshalNCmdResponse2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐCmdResponse(ctx, field.Selections, res)
+	return ec.marshalNTodoMutationResponse2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐTodoMutationResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -666,12 +605,16 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "isSucessfull":
-				return ec.fieldContext_CmdResponse_isSucessfull(ctx, field)
+			case "sucess":
+				return ec.fieldContext_TodoMutationResponse_sucess(ctx, field)
 			case "error":
-				return ec.fieldContext_CmdResponse_error(ctx, field)
+				return ec.fieldContext_TodoMutationResponse_error(ctx, field)
+			case "message":
+				return ec.fieldContext_TodoMutationResponse_message(ctx, field)
+			case "todo":
+				return ec.fieldContext_TodoMutationResponse_todo(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type CmdResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type TodoMutationResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -714,9 +657,9 @@ func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*shared.CmdResponse)
+	res := resTmp.(*shared.TodoMutationResponse)
 	fc.Result = res
-	return ec.marshalNCmdResponse2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐCmdResponse(ctx, field.Selections, res)
+	return ec.marshalNTodoMutationResponse2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐTodoMutationResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -727,12 +670,16 @@ func (ec *executionContext) fieldContext_Mutation_updateTodo(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "isSucessfull":
-				return ec.fieldContext_CmdResponse_isSucessfull(ctx, field)
+			case "sucess":
+				return ec.fieldContext_TodoMutationResponse_sucess(ctx, field)
 			case "error":
-				return ec.fieldContext_CmdResponse_error(ctx, field)
+				return ec.fieldContext_TodoMutationResponse_error(ctx, field)
+			case "message":
+				return ec.fieldContext_TodoMutationResponse_message(ctx, field)
+			case "todo":
+				return ec.fieldContext_TodoMutationResponse_todo(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type CmdResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type TodoMutationResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -775,9 +722,9 @@ func (ec *executionContext) _Mutation_completeTodo(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*shared.CmdResponse)
+	res := resTmp.(*shared.TodoMutationResponse)
 	fc.Result = res
-	return ec.marshalNCmdResponse2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐCmdResponse(ctx, field.Selections, res)
+	return ec.marshalNTodoMutationResponse2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐTodoMutationResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_completeTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -788,12 +735,16 @@ func (ec *executionContext) fieldContext_Mutation_completeTodo(ctx context.Conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "isSucessfull":
-				return ec.fieldContext_CmdResponse_isSucessfull(ctx, field)
+			case "sucess":
+				return ec.fieldContext_TodoMutationResponse_sucess(ctx, field)
 			case "error":
-				return ec.fieldContext_CmdResponse_error(ctx, field)
+				return ec.fieldContext_TodoMutationResponse_error(ctx, field)
+			case "message":
+				return ec.fieldContext_TodoMutationResponse_message(ctx, field)
+			case "todo":
+				return ec.fieldContext_TodoMutationResponse_todo(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type CmdResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type TodoMutationResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -859,6 +810,8 @@ func (ec *executionContext) fieldContext_Query_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "completedAt":
 				return ec.fieldContext_Todo_completedAt(ctx, field)
+			case "dueAt":
+				return ec.fieldContext_Todo_dueAt(ctx, field)
 			case "userID":
 				return ec.fieldContext_Todo_userID(ctx, field)
 			}
@@ -917,6 +870,8 @@ func (ec *executionContext) fieldContext_Query_todosByUserID(ctx context.Context
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "completedAt":
 				return ec.fieldContext_Todo_completedAt(ctx, field)
+			case "dueAt":
+				return ec.fieldContext_Todo_dueAt(ctx, field)
 			case "userID":
 				return ec.fieldContext_Todo_userID(ctx, field)
 			}
@@ -983,6 +938,8 @@ func (ec *executionContext) fieldContext_Query_todoByID(ctx context.Context, fie
 				return ec.fieldContext_Todo_createdAt(ctx, field)
 			case "completedAt":
 				return ec.fieldContext_Todo_completedAt(ctx, field)
+			case "dueAt":
+				return ec.fieldContext_Todo_dueAt(ctx, field)
 			case "userID":
 				return ec.fieldContext_Todo_userID(ctx, field)
 			}
@@ -1457,6 +1414,50 @@ func (ec *executionContext) fieldContext_Todo_completedAt(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Todo_dueAt(ctx context.Context, field graphql.CollectedField, obj *shared.Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_dueAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DueAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Todo_dueAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Todo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Todo_userID(ctx context.Context, field graphql.CollectedField, obj *shared.Todo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Todo_userID(ctx, field)
 	if err != nil {
@@ -1496,6 +1497,189 @@ func (ec *executionContext) fieldContext_Todo_userID(ctx context.Context, field 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TodoMutationResponse_sucess(ctx context.Context, field graphql.CollectedField, obj *shared.TodoMutationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TodoMutationResponse_sucess(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Sucess, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TodoMutationResponse_sucess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TodoMutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TodoMutationResponse_error(ctx context.Context, field graphql.CollectedField, obj *shared.TodoMutationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TodoMutationResponse_error(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TodoMutationResponse_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TodoMutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TodoMutationResponse_message(ctx context.Context, field graphql.CollectedField, obj *shared.TodoMutationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TodoMutationResponse_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TodoMutationResponse_message(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TodoMutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TodoMutationResponse_todo(ctx context.Context, field graphql.CollectedField, obj *shared.TodoMutationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TodoMutationResponse_todo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Todo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*shared.Todo)
+	fc.Result = res
+	return ec.marshalOTodo2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐTodo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TodoMutationResponse_todo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TodoMutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Todo_id(ctx, field)
+			case "text":
+				return ec.fieldContext_Todo_text(ctx, field)
+			case "done":
+				return ec.fieldContext_Todo_done(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Todo_createdAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_Todo_completedAt(ctx, field)
+			case "dueAt":
+				return ec.fieldContext_Todo_dueAt(ctx, field)
+			case "userID":
+				return ec.fieldContext_Todo_userID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
 		},
 	}
 	return fc, nil
@@ -3369,7 +3553,7 @@ func (ec *executionContext) unmarshalInputCreateTodo(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"text", "userID"}
+	fieldsInOrder := [...]string{"text", "dueAt", "userID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3385,6 +3569,15 @@ func (ec *executionContext) unmarshalInputCreateTodo(ctx context.Context, obj in
 				return it, err
 			}
 			it.Text = data
+		case "dueAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dueAt"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DueAt = data
 		case "userID":
 			var err error
 
@@ -3407,7 +3600,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "text", "userID"}
+	fieldsInOrder := [...]string{"id", "text", "done", "dueAt", "userID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3432,6 +3625,24 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 				return it, err
 			}
 			it.Text = data
+		case "done":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Done = data
+		case "dueAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dueAt"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DueAt = data
 		case "userID":
 			var err error
 
@@ -3454,47 +3665,6 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
-
-var cmdResponseImplementors = []string{"CmdResponse"}
-
-func (ec *executionContext) _CmdResponse(ctx context.Context, sel ast.SelectionSet, obj *shared.CmdResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, cmdResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("CmdResponse")
-		case "isSucessfull":
-			out.Values[i] = ec._CmdResponse_isSucessfull(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "error":
-			out.Values[i] = ec._CmdResponse_error(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
 
 var mutationImplementors = []string{"Mutation"}
 
@@ -3746,11 +3916,61 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "completedAt":
 			out.Values[i] = ec._Todo_completedAt(ctx, field, obj)
+		case "dueAt":
+			out.Values[i] = ec._Todo_dueAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "userID":
 			out.Values[i] = ec._Todo_userID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var todoMutationResponseImplementors = []string{"TodoMutationResponse"}
+
+func (ec *executionContext) _TodoMutationResponse(ctx context.Context, sel ast.SelectionSet, obj *shared.TodoMutationResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, todoMutationResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TodoMutationResponse")
+		case "sucess":
+			out.Values[i] = ec._TodoMutationResponse_sucess(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "error":
+			out.Values[i] = ec._TodoMutationResponse_error(ctx, field, obj)
+		case "message":
+			out.Values[i] = ec._TodoMutationResponse_message(ctx, field, obj)
+		case "todo":
+			out.Values[i] = ec._TodoMutationResponse_todo(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4159,20 +4379,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNCmdResponse2githubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐCmdResponse(ctx context.Context, sel ast.SelectionSet, v shared.CmdResponse) graphql.Marshaler {
-	return ec._CmdResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNCmdResponse2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐCmdResponse(ctx context.Context, sel ast.SelectionSet, v *shared.CmdResponse) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._CmdResponse(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNCreateTodo2githubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐCreateTodo(ctx context.Context, v interface{}) (shared.CreateTodo, error) {
 	res, err := ec.unmarshalInputCreateTodo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4260,6 +4466,20 @@ func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑ
 		return graphql.Null
 	}
 	return ec._Todo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNTodoMutationResponse2githubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐTodoMutationResponse(ctx context.Context, sel ast.SelectionSet, v shared.TodoMutationResponse) graphql.Marshaler {
+	return ec._TodoMutationResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTodoMutationResponse2ᚖgithubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐTodoMutationResponse(ctx context.Context, sel ast.SelectionSet, v *shared.TodoMutationResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TodoMutationResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNUpdateTodo2githubᚗcomᚋliviudnicoaraᚋgoᚑgraphqlᚑpocᚋsharedᚐUpdateTodo(ctx context.Context, v interface{}) (shared.UpdateTodo, error) {
