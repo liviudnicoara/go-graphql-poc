@@ -18,6 +18,7 @@ const defaultPort = "8080"
 func main() {
 
 	subscriptionService := todo.NewSubscriptionService()
+	defer subscriptionService.Stop()
 	todoRepo := todo.NewToDoRepository()
 
 	// Start the background task in a goroutine

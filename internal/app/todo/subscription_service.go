@@ -26,6 +26,7 @@ type subscriptionService struct {
 func NewSubscriptionService() *subscriptionService {
 	return &subscriptionService{
 		subscribers: make(map[uuid.UUID]chan shared.Todo),
+		stopCh:      make(chan struct{}),
 	}
 }
 
