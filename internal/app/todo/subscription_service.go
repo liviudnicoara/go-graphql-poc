@@ -12,11 +12,14 @@ type SubscriptionService interface {
 	Subscribe(id uuid.UUID) chan shared.Todo
 	Unsubscribe(id uuid.UUID)
 	Publish(todo shared.Todo)
+	Stop()
 }
 
 type subscriptionService struct {
 	subscribers map[uuid.UUID]chan shared.Todo
 	mutex       sync.RWMutex
+	stopCh      chan struct{} // Channel to signal goroutines to stop
+	wg          sync.WaitGroup
 }
 
 // NewSubscriptionService creates a new instance of the SubscriptionService.
@@ -56,11 +59,32 @@ func (ps *subscriptionService) Publish(event shared.Todo) {
 	ps.mutex.RLock()
 	defer ps.mutex.RUnlock()
 
-	log.Println(event)
+	ps.wg.Add(1)
 
 	go func(ch chan shared.Todo) {
-		log.Println("event: ", event)
-		ch <- event
+		defer ps.wg.Done()
+
+		select {
+		case ch <- event:
+		case <-ps.stopCh:
+			return
+		}
 	}(ps.subscribers[uuid.MustParse(event.UserID)])
 
+}
+
+func (ps *subscriptionService) Stop() {
+	ps.mutex.Lock()
+	defer ps.mutex.Unlock()
+
+	close(ps.stopCh) // Signal goroutines to stop
+
+	// Wait for all goroutines to complete
+	ps.wg.Wait()
+
+	// Close remaining event channels
+	for id, ch := range ps.subscribers {
+		close(ch)
+		delete(ps.subscribers, id)
+	}
 }
