@@ -166,11 +166,32 @@ func (r *queryResolver) TodoByID(ctx context.Context, id string) (*shared.Todo, 
 	return &todo, nil
 }
 
+// TodoOverdue is the resolver for the todoOverdue field.
+func (r *subscriptionResolver) TodoOverdue(ctx context.Context, userID string) (<-chan *shared.Todo, error) {
+	todoChannel := make(chan *shared.Todo)
+
+	overdueChannel := r.SubscriptionSvc.Subscribe(uuid.MustParse(userID))
+	//defer r.SubscriptionSvc.Unsubscribe(uuid.MustParse(userID))
+
+	go func() {
+		for {
+			todo := <-overdueChannel
+			todoChannel <- &todo
+		}
+	}()
+
+	return todoChannel, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Subscription returns SubscriptionResolver implementation.
+func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }

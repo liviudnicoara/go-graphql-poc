@@ -1,0 +1,19 @@
+# Get all todos
+query {
+  todos {
+    id,
+    text,
+    createdAt,
+    completedAt,
+    done,
+    userID,    
+  }
+}
+
+# Create todo
+mutation {
+  createTodo(cmd: {text: "todo 1", userID: "1"}){
+    isSucessfull
+    error
+  }
+}

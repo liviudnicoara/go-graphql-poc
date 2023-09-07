@@ -2,20 +2,24 @@
 
 package shared
 
+import (
+	"time"
+)
+
 type CreateTodo struct {
-	Text   string `json:"text"`
-	DueAt  string `json:"dueAt"`
-	UserID string `json:"userID"`
+	Text   string    `json:"text"`
+	DueAt  time.Time `json:"dueAt"`
+	UserID string    `json:"userID"`
 }
 
 type Todo struct {
-	ID          string  `json:"id"`
-	Text        string  `json:"text"`
-	Done        bool    `json:"done"`
-	CreatedAt   string  `json:"createdAt"`
-	CompletedAt *string `json:"completedAt,omitempty"`
-	DueAt       string  `json:"dueAt"`
-	UserID      string  `json:"userID"`
+	ID          string     `json:"id"`
+	Text        string     `json:"text"`
+	Done        bool       `json:"done"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	CompletedAt *time.Time `json:"completedAt,omitempty"`
+	DueAt       time.Time  `json:"dueAt"`
+	UserID      string     `json:"userID"`
 }
 
 type TodoMutationResponse struct {
@@ -26,11 +30,11 @@ type TodoMutationResponse struct {
 }
 
 type UpdateTodo struct {
-	ID     string `json:"id"`
-	Text   string `json:"text"`
-	Done   bool   `json:"done"`
-	DueAt  string `json:"dueAt"`
-	UserID string `json:"userID"`
+	ID     string    `json:"id"`
+	Text   string    `json:"text"`
+	Done   bool      `json:"done"`
+	DueAt  time.Time `json:"dueAt"`
+	UserID string    `json:"userID"`
 }
 
 type User struct {

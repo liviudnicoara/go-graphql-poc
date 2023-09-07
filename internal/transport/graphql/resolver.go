@@ -10,6 +10,7 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	UserRepo user.UserRepository
-	TodoRepo todo.TodoRepository
+	UserRepo        user.UserRepository
+	TodoRepo        todo.TodoRepository
+	SubscriptionSvc todo.SubscriptionService
 }

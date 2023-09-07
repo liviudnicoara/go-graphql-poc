@@ -1,10 +1,13 @@
+scalar Time
+
+
 type Todo {
     id: ID!
     text: String!
     done: Boolean!
-    createdAt: String!
-    completedAt: String
-    dueAt: String!
+    createdAt: Time!
+    completedAt: Time
+    dueAt: Time!
     userID: ID!
 }
 
@@ -20,9 +23,14 @@ type Mutation {
     completeTodo(id: ID!): TodoMutationResponse!
 }
 
+type Subscription {
+  todoOverdue(userID: ID!): Todo
+}
+
+
 input CreateTodo {
     text: String!
-    dueAt: String!
+    dueAt: Time!
     userID: ID!
 }
 
@@ -30,7 +38,7 @@ input UpdateTodo {
     id: ID!
     text: String!
     done: Boolean!
-    dueAt: String!
+    dueAt: Time!
     userID: ID!
 }
 
