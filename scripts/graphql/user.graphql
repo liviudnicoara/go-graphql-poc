@@ -1,0 +1,8 @@
+#Subscribe to notifications
+
+subscription {
+  todoOverdue(userID: "ef6da77d-e595-4077-b4ad-2790dae1ad61"){
+    text
+    id
+  }
+}

@@ -12,8 +12,7 @@ query {
 
 # Create todo
 mutation {
-  createTodo(cmd: {text: "todo 1", userID: "1"}){
-    isSucessfull
-    error
+  createTodo(cmd: {text:"yasasaes", userID: "ef6da77d-e595-4077-b4ad-2790dae1ad61", dueAt: "2023-09-07T12:00:00.000Z"}){
+    sucess
   }
 }

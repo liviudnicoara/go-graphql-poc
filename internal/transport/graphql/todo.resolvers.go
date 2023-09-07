@@ -19,15 +19,8 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, cmd shared.CreateTodo
 		UserID: cmd.UserID,
 	}
 
-	err := r.TodoRepo.Add(todo)
-
-	if err != nil {
-		errMsg := err.Error()
-		return &shared.TodoMutationResponse{
-			Sucess: false,
-			Error:  &errMsg,
-		}, nil
-	}
+	id := r.TodoRepo.Add(todo)
+	todo.ID = id.String()
 
 	return &shared.TodoMutationResponse{
 		Sucess:  true,

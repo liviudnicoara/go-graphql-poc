@@ -11,7 +11,7 @@ import (
 type GenericRepository[T any] interface {
 	Get() ([]T, error)
 	GetByID(uuid.UUID) (T, error)
-	Add(T) error
+	Add(T) uuid.UUID
 	Update(uuid.UUID, T) error
 }
 
@@ -51,13 +51,14 @@ func (r *genericRepository[T]) GetByID(id uuid.UUID) (T, error) {
 	return r.Items[id], nil
 }
 
-func (r *genericRepository[T]) Add(item T) error {
+func (r *genericRepository[T]) Add(item T) uuid.UUID {
 	r.m.Lock()
 	defer r.m.Unlock()
 
-	r.Items[uuid.New()] = item
+	id := uuid.New()
+	r.Items[id] = item
 
-	return nil
+	return id
 }
 
 func (r *genericRepository[T]) Update(id uuid.UUID, item T) error {
